@@ -1,8 +1,10 @@
+import { getUserId } from '@/utils/query'
 import React from 'react'
 
-const page = () => {
+const page = async () => {
+  const userId = await getUserId<{id: string}>();
   return (
-    <div>dashboard page</div>
+    <div>dashboard page {userId?.id}</div>
   )
 }
 
