@@ -17,7 +17,7 @@ const TestCards = () => {
 
   const router = useRouter();
   const handleClick = () => {
-    router.push("/journal");
+    router.push("/journals");
   }
 
   const journals = [
