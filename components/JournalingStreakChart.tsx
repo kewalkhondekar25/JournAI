@@ -1,25 +1,39 @@
 "use client";
 
 import { Flame, Trophy, XCircle } from "lucide-react";
-import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from "recharts";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Label,
+  PolarGrid,
+  PolarRadiusAxis,
+  RadialBar,
+  RadialBarChart,
+} from "recharts";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
 
 export function JournalingStreakChart() {
-  const [streakData, setStreakData] = useState<{ day: number; journaled: number }[]>([]);
-  const [streakStats, setStreakStats] = useState({ currentStreak: 0, longestStreak: 0, missedDays: 0 });
-  const [journaledPercentage, setJournaledPercentage] = useState(0);
+  const [streakStats, setStreakStats] = useState({
+    currentStreak: 0,
+    longestStreak: 0,
+    missedDays: 0,
+    journaledPercentage: 0,
+  });
 
   useEffect(() => {
-    // Generate streak data only on the client side to avoid hydration errors
     const generatedData = Array.from({ length: 30 }, (_, i) => ({
       day: i + 1,
-      journaled: Math.random() > 0.2 ? 1 : 0, // 80% chance of journaling
+      journaled: Math.random() > 0.2 ? 1 : 0,
     }));
 
-    setStreakData(generatedData);
-
-    // Calculate streak statistics
     let currentStreak = 0;
     let longestStreak = 0;
     let tempStreak = 0;
@@ -36,57 +50,82 @@ export function JournalingStreakChart() {
       }
     }
 
-    setStreakStats({ currentStreak, longestStreak, missedDays });
-
-    // Calculate percentage of days journaled
-    const totalDays = generatedData.length;
     const journaledDays = generatedData.filter((day) => day.journaled === 1).length;
-    setJournaledPercentage(Math.round((journaledDays / totalDays) * 100));
+    const journaledPercentage = Math.round((journaledDays / generatedData.length) * 100);
+
+    setStreakStats({ currentStreak, longestStreak, missedDays, journaledPercentage });
   }, []);
 
-  // Radial chart data
-  const radialData = [
-    { name: "Completed", value: journaledPercentage, fill: "hsl(var(--green-500))" },
+  const chartData = [
+    { name: "Completed", value: streakStats.journaledPercentage, fill: "hsl(var(--green-500))" },
   ];
 
+  const chartConfig: ChartConfig = {
+    completed: {
+      label: "Completion",
+      color: "hsl(var(--chart-2))",
+    },
+  };
+
   return (
-    <Card className="w-full max-w-[350px]">
-      <CardHeader>
+    <Card className="flex flex-col w-full shadow-md">
+      <CardHeader className="items-center pb-0">
         <CardTitle>Journaling Streak</CardTitle>
         <CardDescription>Track your monthly consistency.</CardDescription>
       </CardHeader>
-      <CardContent className="h-[250px] flex items-center justify-center relative">
-        <ResponsiveContainer width="100%" height="100%">
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[210px]"
+        >
           <RadialBarChart
-            cx="50%"
-            cy="50%"
-            innerRadius="75%"
-            outerRadius="100%"
-            barSize={15}
-            data={radialData}
-            startAngle={-45} // Start from top
-            endAngle={-45 + (journaledPercentage / 100) * 360} // Dynamically fill based on percentage
+            data={chartData}
+            startAngle={0}
+            endAngle={(streakStats.journaledPercentage / 100) * 360}
+            innerRadius={80}
+            outerRadius={110}
           >
-            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-            <RadialBar dataKey="value" background cornerRadius={5} />
+            <PolarGrid gridType="circle" radialLines={false} stroke="none" polarRadius={[86, 74]} />
+            <RadialBar dataKey="value" background cornerRadius={10} />
+            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
+                        <tspan
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          className="fill-foreground text-4xl font-bold"
+                        >
+                          {streakStats.journaledPercentage}%
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground"
+                        >
+                          Completed
+                        </tspan>
+                      </text>
+                    );
+                  }
+                }}
+              />
+            </PolarRadiusAxis>
           </RadialBarChart>
-        </ResponsiveContainer>
-        {/* Centered Percentage Display */}
-        <div className="absolute text-center text-lg font-semibold text-primary">
-          {journaledPercentage}% <br />
-          Completed
-        </div>
+        </ChartContainer>
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
           <Flame className="h-4 w-4 text-orange-500" />
           Current Streak: <span className="text-primary">{streakStats.currentStreak} days</span>
         </div>
-        <div className="flex gap-2 font-medium leading-none">
+        <div className="flex items-center gap-2 font-medium leading-none">
           <Trophy className="h-4 w-4 text-yellow-500" />
           Longest Streak: <span className="text-primary">{streakStats.longestStreak} days</span>
         </div>
-        <div className="flex gap-2 font-medium leading-none">
+        <div className="flex items-center gap-2 font-medium leading-none">
           <XCircle className="h-4 w-4 text-red-500" />
           Days Missed: <span className="text-primary">{streakStats.missedDays}</span>
         </div>

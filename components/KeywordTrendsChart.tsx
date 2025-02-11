@@ -54,12 +54,12 @@ const chartConfig = {
 
 export function KeywordTrendsChart() {
   return (
-    <Card>
+    <Card className="flex flex-col w-full shadow-md">
       <CardHeader>
         <CardTitle>Bar Chart - Mentions</CardTitle>
         <CardDescription>Topics discussed the most</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[225px]">
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
@@ -83,10 +83,10 @@ export function KeywordTrendsChart() {
               content={<ChartTooltipContent hideLabel />}
             />
             <Bar dataKey="mentions" radius={5}>
-  {chartData.map((entry, index) => (
-    <Cell key={`cell-${index}`} fill={entry.fill} />
-  ))}
-</Bar>
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>

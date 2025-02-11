@@ -18,7 +18,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-// Emotion Breakdown Data
 const emotionData = [
   { emotion: "Joy", percentage: 30, color: "#ff7f50" }, // Coral 🍊
   { emotion: "Stress", percentage: 25, color: "#ff4757" }, // Red 😓
@@ -38,7 +37,7 @@ const chartConfig = {
 
 export function EmotionBreakdownChart() {
   return (
-    <Card className="flex flex-col w-[320px] shadow-md">
+    <Card className="flex flex-col w-full shadow-md">
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-base">Emotion Breakdown</CardTitle>
         <CardDescription className="text-xs">Past Week/Month</CardDescription>

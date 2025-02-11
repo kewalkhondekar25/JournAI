@@ -1,6 +1,8 @@
+export const dynamic = 'force-dynamic'
+
 import JournalCard from '@/components/JournalCard';
 import { getJournalData, getUserId } from '@/utils/query'
-import { Journal, User } from '@prisma/client';
+import { Journal } from '@prisma/client';
 import React from 'react'
 
 const fetchJournals = async () => {
@@ -18,9 +20,9 @@ const page = async () => {
   
   return (
     <div>
-      {/* {
+      {
         data && data.length > 0 ? "non empty" : "empty"
-      } */}
+      }
       <JournalCard/>
     </div>
   )
