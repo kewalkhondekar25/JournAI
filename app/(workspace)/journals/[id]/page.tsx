@@ -10,9 +10,9 @@ import {
 import { getJournal } from '@/utils/api';
 import { formatDistanceToNow, isToday } from 'date-fns';
 
-const page = async ({ params }: { params: { id: string } }) => {
+const page = async ({ params }: any) => {
 
-  const { id } = await params;
+  const { id } = params;
 
   const journalData = await getJournal(id);
   if (!journalData) {
