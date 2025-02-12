@@ -12,7 +12,7 @@ import { formatDistanceToNow, isToday } from 'date-fns';
 
 const page = async ({ params }: any) => {
 
-  const { id } = params;
+  const { id } = await params;
 
   const journalData = await getJournal(id);
   if (!journalData) {
