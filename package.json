@@ -21,7 +21,6 @@
     "next": "15.1.6",
     "prettier": "^3.5.0",
     "react": "^19.0.0",
-    "react-autosave": "^0.4.4",
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
     "recharts": "^2.15.1",
