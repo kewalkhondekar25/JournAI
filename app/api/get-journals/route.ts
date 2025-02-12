@@ -13,7 +13,14 @@ export const GET = async () => {
       where: { clerkId: userId.id },
       select: {
         Journal: {
-          orderBy: { createdAt: "desc" }
+          select: {
+            id: true,
+            title: true,
+            paragraph: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          orderBy: { createdAt: "desc" },
         }
       }
     });
