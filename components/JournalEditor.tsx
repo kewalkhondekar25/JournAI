@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, memo, useState } from 'react'
 import { debounce } from "lodash"
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setIsNewJournalId, setTodaysJournal } from '@/redux/features/journalSlice';
+import { analyzeJournal } from '@/utils/llm';
 
 const MemoizedTextArea = memo(({ 
   defaultValue, 
@@ -40,7 +41,7 @@ const JournalEditor = memo(() => {
   const handleSave = useCallback(async (value: string) => {
     if (!value.trim() || isSaving) return;
     setIsSaving(true);
-
+    
     try {
       if(isNewJournalId === null) {
         const response = await fetch("/api/create-journal", {
@@ -58,6 +59,7 @@ const JournalEditor = memo(() => {
           headers: { "Content-Type": "application/json" },
         });
         const result = await response.json();
+        // await analyzeJournal(value); //Analyze func
         dispatch(setTodaysJournal(result.data));
       }
     } catch (error) {
