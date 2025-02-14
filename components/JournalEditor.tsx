@@ -4,13 +4,16 @@ import { debounce } from "lodash"
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setIsNewJournalId, setTodaysJournal } from '@/redux/features/journalSlice';
 import { analyzeJournal } from '@/utils/llm';
+import { Button } from './ui/button';
+import Spinner from './Spinner';
+import { setIsGenerateAnalyzeClick, setStreamData } from '@/redux/features/motionSlice';
 
-const MemoizedTextArea = memo(({ 
-  defaultValue, 
-  onChange, 
-  textRef 
-}: { 
-  defaultValue: string, 
+const MemoizedTextArea = memo(({
+  defaultValue,
+  onChange,
+  textRef
+}: {
+  defaultValue: string,
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void,
   textRef: React.MutableRefObject<HTMLTextAreaElement | null>
 }) => (
@@ -18,7 +21,7 @@ const MemoizedTextArea = memo(({
     ref={textRef}
     defaultValue={defaultValue}
     placeholder='✨ "Start writing your journal... your thoughts, ideas, and memories await."'
-    className="w-full h-full p-5 outline-none"
+    className="w-[calc(40vw)] h-[calc(50vh)] p-5 resize-none overflow-hidden outline-none"
     onChange={onChange}
   />
 ));
@@ -26,7 +29,7 @@ const MemoizedTextArea = memo(({
 MemoizedTextArea.displayName = 'MemoizedTextArea';
 
 const SavingIndicator = memo(({ isSaving }: { isSaving: boolean }) => (
-  isSaving ? <div className="text-sm text-gray-500">Saving...</div> : null
+  isSaving ? <Spinner/> : null
 ));
 
 SavingIndicator.displayName = 'SavingIndicator';
@@ -37,13 +40,14 @@ const JournalEditor = memo(() => {
   const [isSaving, setIsSaving] = useState(false);
   const dispatch = useAppDispatch();
   const { isNewJournalId, todaysJournal } = useAppSelector(state => state.journal);
+  const { isGenerateAnalyzeClick } = useAppSelector(state => state.motion);
 
   const handleSave = useCallback(async (value: string) => {
     if (!value.trim() || isSaving) return;
     setIsSaving(true);
-    
+
     try {
-      if(isNewJournalId === null) {
+      if (isNewJournalId === null) {
         const response = await fetch("/api/create-journal", {
           method: "POST",
           body: JSON.stringify({ value }),
@@ -77,6 +81,7 @@ const JournalEditor = memo(() => {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     contentRef.current = e.target.value;
     debouncedSave(e.target.value);
+
   }, [debouncedSave]);
 
   const handleTodaysJournal = useCallback(async () => {
@@ -87,7 +92,7 @@ const JournalEditor = memo(() => {
       });
       const response = await result.json();
 
-      if(!response || !response.data) return;
+      if (!response || !response.data) return;
       dispatch(setIsNewJournalId(response.data.id ?? null));
       dispatch(setTodaysJournal(response.data));
     } catch (error) {
@@ -100,14 +105,22 @@ const JournalEditor = memo(() => {
     textRef.current?.focus();
   }, [handleTodaysJournal]);
 
+  const handleClick = async () => {
+    // await analyzeJournal(contentRef.current);
+    dispatch(setIsGenerateAnalyzeClick());
+    // dispatch(setStreamData(output)); //LLM call 
+
+  }
+
   return (
-    <div className="h-full w-full">
+    <div className="flex flex-col justify-center items-center h-full w-full">
+      <SavingIndicator isSaving={isSaving} />
       <MemoizedTextArea
         defaultValue={todaysJournal?.paragraph || ""}
         onChange={handleChange}
         textRef={textRef}
       />
-      <SavingIndicator isSaving={isSaving} />
+      { !isGenerateAnalyzeClick && <Button onClick={handleClick}>Generate Analysis</Button>}
     </div>
   );
 });

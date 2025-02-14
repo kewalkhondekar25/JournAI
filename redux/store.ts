@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit"
 import counterReducer from "./features/counterSlice"
 import journalReducer from "./features/journalSlice"
+import motionReducer from "./features/motionSlice"
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
-    journal: journalReducer
+    journal: journalReducer,
+    motion: motionReducer
   }
 });
 
