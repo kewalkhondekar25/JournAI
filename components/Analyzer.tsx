@@ -1,13 +1,9 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import JournalEditor from './JournalEditor'
-import { useAppDispatch, useAppSelector } from '@/redux/hooks'
+import { useAppSelector } from '@/redux/hooks'
 import Streamer from './Streamer'
-import { Button } from './ui/button'
-import { setIsGenerateAnalyzeClick } from '@/redux/features/motionSlice'
-import { analyzeJournal } from '@/utils/llm'
-import { chunk } from 'lodash'
 
 const Analyzer = () => {
   const { isGenerateAnalyzeClick } = useAppSelector(state => state.motion);

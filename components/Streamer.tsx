@@ -1,12 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { parse } from "partial-json";
-import { Input } from "@/components/ui/input";
 import { journalAnalyzeSchema } from "@/utils/schema";
-import { useAppSelector } from "@/redux/hooks";
 import axios from "axios"
-import { log } from "node:console";
+import { Button } from "./ui/button";
 
 export default function SyncPage() {
 
@@ -14,33 +13,30 @@ export default function SyncPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [recipe, setRecipe] = useState<z.infer<typeof journalAnalyzeSchema>>();
-  console.log(prompt);
-  
+  const hasFetched = useRef(false);
 
   const getTodaysJournal = async () => {
-
     try {
-      setIsLoading(prev => !prev);
+      setIsLoading(true);
       const result = await axios.get("/api/todays-journal");
       const response = await result.data;
       if(!response){
-        setErrorMsg("API Error")
+        return ("API Error");
       };
-      setPrompt(response?.paragraph);
+      setPrompt(response.data.paragraph);
+      await handleSubmit(response.data.paragraph);
     } catch (error) {
       console.log(error);
       setErrorMsg(error instanceof Error ? error.message : "Unknow Error")
     }
   };
 
-  async function handleSubmit() {
-    setPrompt("");
-    setIsLoading(true);
+  async function handleSubmit(currentPrompt: string) {
     setRecipe(undefined);
 
     const res = await fetch("/api/langchain", {
       method: "POST",
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt: currentPrompt }),
     });
 
     const reader = res.body?.getReader();
@@ -60,31 +56,21 @@ export default function SyncPage() {
       console.log(recipe);
 
     }
-
     setIsLoading(false);
   };
 
   useEffect(() => {
-    getTodaysJournal();
+    if (!hasFetched.current) {
+      hasFetched.current = true;
+      getTodaysJournal();
+    }
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
-      <Input
-        value={prompt}
-        disabled={isLoading}
-        onChange={(e) => setPrompt(e.target.value)}
-        onKeyDown={async (e) => {
-          if (e.key === "Enter") {
-            handleSubmit();
-          }
-        }}
-        placeholder="What recipe do you want?"
-      />
+    <div className="flex flex-col gap-4 p-3">
       {isLoading && <div>Loading...</div>}
-      {/* <RecipeCard recipe={recipe} /> */}
       {recipe && (
-        <div className="p-4 border rounded-lg bg-gray-100 w-1/2">
+        <div className="p-4 border rounded-lg bg-gray-100 w-full">
           <dl>
             {Object.entries(recipe).map(([key, value]) => (
               <div key={key} className="mb-2">
@@ -95,6 +81,7 @@ export default function SyncPage() {
           </dl>
         </div>
       )}
+      {recipe && <Button className="w-12">Back</Button>}
     </div>
   );
 }
