@@ -1,142 +1,100 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { Button } from "./ui/button";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { parse } from "partial-json";
+import { Input } from "@/components/ui/input";
+import { journalAnalyzeSchema } from "@/utils/schema";
 import { useAppSelector } from "@/redux/hooks";
+import axios from "axios"
+import { log } from "node:console";
 
-// const streamJournalAnalysis = async (
-//   input: string,
-//   setOutput: React.Dispatch<React.SetStateAction<string[]>>
-// ) => {
-//   try {
-//     const response = await fetch("/api/analyze-journal", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ input }),
-//     });
+export default function SyncPage() {
 
-//     if (!response.body) return;
+  const [prompt, setPrompt] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [recipe, setRecipe] = useState<z.infer<typeof journalAnalyzeSchema>>();
+  console.log(prompt);
+  
 
-//     const reader = response.body.getReader();
-//     const decoder = new TextDecoder();
-    
-//     let pendingText = "";
-//     let wordsQueue: string[] = [];
+  const getTodaysJournal = async () => {
 
-//     while (true) {
-//       const { done, value } = await reader.read();
-//       if (done) break;
+    try {
+      setIsLoading(prev => !prev);
+      const result = await axios.get("/api/todays-journal");
+      const response = await result.data;
+      if(!response){
+        setErrorMsg("API Error")
+      };
+      setPrompt(response?.paragraph);
+    } catch (error) {
+      console.log(error);
+      setErrorMsg(error instanceof Error ? error.message : "Unknow Error")
+    }
+  };
 
-//       const chunk = decoder.decode(value, { stream: true });
-//       pendingText += chunk; 
+  async function handleSubmit() {
+    setPrompt("");
+    setIsLoading(true);
+    setRecipe(undefined);
 
-//       // Split properly into words
-//       let words = pendingText.split(/\s+/);
-//       pendingText = words.pop() || ""; // Keep last word if incomplete
-
-//       // Remove duplicate words by checking the last output word
-//       words = words.filter((word, index, arr) => word !== arr[index - 1]);
-
-//       // Remove unnecessary ** formatting
-//       words = words.map(word => word.replace(/\*\*(.*?)\*\*/g, "$1"));
-
-//       // Display words one by one
-//       for (let word of words) {
-//         setOutput((prev) => [...prev, word]);
-//         await new Promise((resolve) => setTimeout(resolve, 200)); // Adjust speed
-//       }
-//     }
-
-//     // Append leftover word if any
-//     if (pendingText.trim()) {
-//       let formattedWord = pendingText.replace(/\*\*(.*?)\*\*/g, "$1");
-//       setOutput((prev) => [...prev, formattedWord]);
-//     }
-
-//   } catch (error) {
-//     console.error("AI Analysis Error:", error);
-//   }
-// };
-
-const streamJournalAnalysis = async (
-  input: string,
-  setOutput: React.Dispatch<React.SetStateAction<string[]>>
-) => {
-  try {
-    const response = await fetch("/api/analyze-journal", {
+    const res = await fetch("/api/langchain", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input }),
+      body: JSON.stringify({ prompt }),
     });
 
-    if (!response.body) return;
+    const reader = res.body?.getReader();
+    if (!reader) {
+      return {};
+    }
 
-    const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    
-    let pendingText = "";
-    
+    let data = "";
+    let parsed = {};
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
+      data += decoder.decode(value);
+      parsed = parse(data);
+      setRecipe(parsed as z.infer<typeof journalAnalyzeSchema>);
+      console.log(recipe);
 
-      let chunk = decoder.decode(value, { stream: true });
-      pendingText += chunk;
-
-      // Look for full sentences or newlines
-      let sentences = pendingText.split(/\n|\. /);
-      pendingText = sentences.pop() || ""; // Keep last incomplete sentence
-
-      for (let sentence of sentences) {
-        setOutput((prev) => [...prev, sentence.trim()]);
-        await new Promise((resolve) => setTimeout(resolve, 200));
-      }
     }
 
-    // If any remaining content
-    if (pendingText.trim()) {
-      setOutput((prev) => [...prev, pendingText.trim()]);
-    }
-
-  } catch (error) {
-    console.error("AI Analysis Error:", error);
-  }
-};
-
-
-const Streamer = () => {
-  const [output, setOutput] = useState<string[]>([]);
-  const { paragraph } = useAppSelector((state) => state.journal.todaysJournal);
-  const { isGenerateAnalyzeClick } = useAppSelector((state) => state.motion);
-
-  const handleAnalyze = () => {
-    if (!paragraph) return;
-    setOutput([]);
-    streamJournalAnalysis(paragraph, setOutput);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    if (isGenerateAnalyzeClick) {
-      setTimeout(() => {
-        handleAnalyze();
-      }, 2000);
-    }
-  }, [isGenerateAnalyzeClick]);
+    getTodaysJournal();
+  }, []);
 
   return (
-    <div className="relative w-full">
-      <div>
-        {output.length > 0
-          ? output.map((word, index) => (
-              <span key={index} className="animate-typing mr-1">
-                {word}{" "}
-              </span>
-            ))
-          : "Streaming output will appear here..."}
-      </div>
-      <Button className="absolute bottom-0">Back</Button>
+    <div className="flex flex-col gap-4">
+      <Input
+        value={prompt}
+        disabled={isLoading}
+        onChange={(e) => setPrompt(e.target.value)}
+        onKeyDown={async (e) => {
+          if (e.key === "Enter") {
+            handleSubmit();
+          }
+        }}
+        placeholder="What recipe do you want?"
+      />
+      {isLoading && <div>Loading...</div>}
+      {/* <RecipeCard recipe={recipe} /> */}
+      {recipe && (
+        <div className="p-4 border rounded-lg bg-gray-100 w-1/2">
+          <dl>
+            {Object.entries(recipe).map(([key, value]) => (
+              <div key={key} className="mb-2">
+                <dt className="font-medium">{key}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
     </div>
   );
-};
-
-export default Streamer;
+}

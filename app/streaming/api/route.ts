@@ -1,4 +1,4 @@
-import { journalAnalyzeSchema } from "@/utils/schema";
+import { RecipeSchema } from "@/utils/schema";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
@@ -18,11 +18,10 @@ export async function POST(req: Request) {
     messages: [
       {
         role: "user",
-        content: `Analyze the following journal entry and generate a detailed analysis.
-        Journal entry: ${prompt}`,
+        content: `Recipe for ${prompt || "chocolate brownies"}`,
       },
     ],
-    response_format: zodResponseFormat(journalAnalyzeSchema, "journalSchema"),
+    response_format: zodResponseFormat(RecipeSchema, "recipeSchema"),
     stream: true,
   });
 

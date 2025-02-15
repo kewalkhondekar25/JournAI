@@ -16,7 +16,7 @@ const Analyzer = () => {
     <div>
       {
         isGenerateAnalyzeClick ?
-          <div className='grid grid-cols-2 bg-pink-300'>
+          <div className='grid grid-cols-2'>
             <Streamer />
             <div className='flex flex-col justify-center items-center p-3 text-center'>
               <div className='flex flex-col font-medium'>
