@@ -4,8 +4,8 @@ import React from 'react'
 
 const Homepage = () => {
   return (
-    <section>
-      <div className='overflow-hidden 
+    <>
+      <section className='overflow-hidden 
       px-4
       sm:px-6
       mt-10
@@ -35,8 +35,8 @@ const Homepage = () => {
             text-2xl
             bg-background'>Get JournAI Free</Button>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
 
