@@ -1,4 +1,5 @@
 import TitleSection from '@/components/landing-page/title-section'
+import { Button } from '@/components/ui/button'
 import React from 'react'
 
 const Homepage = () => {
@@ -13,11 +14,27 @@ const Homepage = () => {
       gap-4
       md:justify-center
       md:items-center'>
-        <TitleSection 
-        pill='✨ Your AI Journal, Perfected' 
-        title='Your AI-Powered Journaling Companion'
-        subtitle='Reflect. Write. Evolve'
+        <TitleSection
+          pill='✨ Your AI Journal, Perfected'
+          title='Your AI-Powered Journaling Companion'
+          subtitle='Reflect. Write. Evolve'
         />
+        <div className='bg-white
+        p-[2px]
+        mt-6
+        rounded-xl
+        bg-gradient-to-r
+        from-primary
+        to-brand/brand-primaryBlue
+        sm:w-[300px]
+        '>
+          <Button
+            className='w-full
+            rounded-[10px]
+            p-6
+            text-2xl
+            bg-background'>Get JournAI Free</Button>
+        </div>
       </div>
     </section>
   )
