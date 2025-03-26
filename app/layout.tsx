@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Providers from "@/redux/provider/Provider";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,17 +28,21 @@ export default function RootLayout({
   return (
     <ClerkProvider
       signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-    >
-    <html lang="en" suppressHydrationWarning={true}>
-      <body
-        suppressHydrationWarning={true}
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <Providers>
-            {children}
-          </Providers>
-      </body>
-    </html>
-    </ClerkProvider>    
+      signUpUrl="/sign-up">
+      <html lang="en" suppressHydrationWarning={true}>
+        <body
+          suppressHydrationWarning={true}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem>
+            <Providers>
+              {children}
+            </Providers>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
