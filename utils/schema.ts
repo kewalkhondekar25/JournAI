@@ -13,13 +13,11 @@ import { z } from "zod"
 const journalAnalyzeSchema = z.object({
   "Subject📌": z.string().describe("Analyze the journal and generate a concise and relevant subject that accurately reflects its main theme or topic. Ensure the subject is engaging and includes a suitable emoji that represents the journal's content."),
   "Summary📖": z.string().describe("Analyze the following journal entry and generate a concise and relevant summary that accurately captures its main points. Ensure the summary is clear, engaging, and includes one or more suitable emojis (e.g., 📖, ✍️, 🌟, 🔍, 💡) that best represent the journal's content."),
+  "Sentiment Score📈": z.string().describe("Analyze the following journal and generate a Sentiment score on a scale from -10 to 10, where -10 is extremly negative, 0 is neutral and 10 is extremly positive."),
   "Mood😊": z.string().describe("Analyze the journal entry and determine the writer's mood based on the tone, emotions, and language used"),
   "Emotion💭": z.string().describe("Analyze the journal entry and determine the predominant emotion expressed. Identify a single, most prominent emotion based on the writer's tone and content."),
-  "Sentiment🟢": z.string().describe("Analyze the journal's overall sentiment (e.g., highly positive, neutral, or negative). Identify key words that reflect emotions such as relaxation, gratitude, or joy."),
-  "EmotionalTone🎭": z.string().describe("Determine the emotional tone of the journal entry (e.g., calm, reflective, appreciative)."),
-  "Fortitude🔵": z.string().describe("Assess whether the entry reflects stress, resilience, or emotional regulation.").optional(),
-  "Introspection🧠": z.string().describe("Provide observations about how the journal reflects emotional well-being and stress coping strategies.").optional(),
-  "Catalyst⚖️": z.string().describe("Evaluate whether the writer maintains a balanced lifestyle based on journal entries.").optional(),
+  "Fortitude🔵": z.string().describe("Assess whether the entry reflects stress, resilience, or emotional regulation."),
+  "Introspection🧠": z.string().describe("Provide observations about how the journal reflects emotional well-being and stress coping strategies."),
 });
 
 export const RecipeSchema = z.object({

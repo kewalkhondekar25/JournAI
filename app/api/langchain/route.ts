@@ -18,8 +18,7 @@ export async function POST(req: Request) {
     messages: [
       {
         role: "user",
-        content: `Analyze the following journal entry and generate a detailed analysis.
-        Journal entry: ${prompt}`,
+        content: `Analyze the following journal entry and generate a detailed analysis. Ensure that every field the schema is completed. Do not leave any field empty or omit any category. Journal entry: ${prompt}`,
       },
     ],
     response_format: zodResponseFormat(journalAnalyzeSchema, "journalSchema"),

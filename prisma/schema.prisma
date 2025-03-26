@@ -24,11 +24,19 @@ model User {
 }
 
 model Journal {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   title     String
-  paragraph String   @db.Text
+  paragraph String    @db.Text
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Analysis  Analysis?
+}
+
+model Analysis {
+  id              String  @id @default(uuid())
+  sentiment_score String?
+  journal_id      String  @unique
+  journal         Journal @relation(fields: [journal_id], references: [id])
 }

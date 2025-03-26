@@ -46,17 +46,22 @@ export default function SyncPage() {
 
     const decoder = new TextDecoder();
     let data = "";
-    let parsed = {};
+    let parsed: Record<string, any> = {};
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       data += decoder.decode(value);
       parsed = parse(data);
       setRecipe(parsed as z.infer<typeof journalAnalyzeSchema>);
-      console.log(recipe);
-
     }
+
+    const subject = parsed["Subject📌"] || "Unknown Subject";
+    const score = parsed["Sentiment Score📈"] || "No Score";
+
+    console.log("Subject:", subject);
+    console.log("Sentiment Score:", score);
     setIsLoading(false);
+    
   };
 
   useEffect(() => {
